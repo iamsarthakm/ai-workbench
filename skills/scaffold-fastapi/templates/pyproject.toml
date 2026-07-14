@@ -17,6 +17,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "mypy>=1.13.0",
     "pytest>=8.4.0",
     "pytest-asyncio>=1.0.0",
     "ruff>=0.7.2",
@@ -26,3 +27,16 @@ dev = [
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.mypy]
+python_version = "3.12"
+exclude = ["^alembic/"]
+ignore_missing_imports = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true
+check_untyped_defs = true
+# Not `strict = true` yet — that's a lot of upfront friction for a fresh scaffold.
+# Tighten incrementally (start with `disallow_untyped_defs = true` on `app/core`
+# and `app/models`) once the codebase has grown past the example resource.

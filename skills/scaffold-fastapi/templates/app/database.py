@@ -16,6 +16,8 @@ engine = create_async_engine(
     echo=False,
     pool_pre_ping=True,
     pool_recycle=300,
+    pool_size=5,  # SQLAlchemy default; raise here under sustained concurrent load
+    max_overflow=10,  # extra connections allowed above pool_size during bursts
 )
 async_session_maker = async_sessionmaker(
     engine,

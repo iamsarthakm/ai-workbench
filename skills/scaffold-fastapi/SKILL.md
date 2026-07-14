@@ -114,6 +114,7 @@ cp "$SKILL_DIR/templates/vscode/extensions.json" .vscode/extensions.json
 
 mkdir -p .github
 cp "$SKILL_DIR/templates/github/pull_request_template.md" .github/PULL_REQUEST_TEMPLATE.md
+cp "$SKILL_DIR/templates/github/dependabot.yml" .github/dependabot.yml
 
 cp "$SKILL_DIR/templates/docker/Dockerfile" Dockerfile
 cp "$SKILL_DIR/templates/docker/docker-compose.yml" docker-compose.yml
@@ -174,8 +175,13 @@ cp "$SKILL_DIR/templates/alembic/env.py" alembic/env.py   # patched: settings-dr
 
 ## Step 10 — Local git hooks (optional but recommended)
 
+Two hook types, since there's no CI to fall back on here: fast checks (ruff,
+gitleaks, mypy) run on every commit; the full test suite runs on push instead
+of commit, since it's slower and commit-time friction adds up over a day of
+small commits.
+
 ```bash
-uv tool run pre-commit install
+uv tool run pre-commit install --hook-type pre-commit --hook-type pre-push
 ```
 
 ## Step 11 — Verify (best-effort; skip if Docker isn't available)
@@ -288,5 +294,7 @@ app/
 │   └── item example wired end-to-end across all five (Step 12 removes it)
 alembic/                   # async migrations, settings-driven
 tests/                     # conftest.py (env bootstrap + shared `client` fixture), health + item tests
+.pre-commit-config.yaml    # ruff + gitleaks + mypy on commit; full pytest suite on push (no CI, so this is the enforcement)
+.github/dependabot.yml     # weekly PRs for uv (Python) + Docker base image updates
 .vscode/, .github/, docker-compose.yml, docker-compose.dev.yml, Dockerfile, .env.example, ...
 ```

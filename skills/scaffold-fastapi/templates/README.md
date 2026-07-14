@@ -84,7 +84,9 @@ Then delete the `items_router` import and the
 ## For contributors
 
 - Branch from `main`, open a PR
-- Pre-commit: `uv tool run pre-commit install` · `uv tool run pre-commit run --files <files>`
+- Pre-commit/pre-push hooks: `uv tool run pre-commit install --hook-type pre-commit --hook-type pre-push`
+  (runs ruff + gitleaks + mypy on every commit, the full test suite on push — there's no CI here, so these hooks are the enforcement)
 - Lint: `uv run ruff check --fix app/` · `uv run ruff format app/`
+- Types: `uv run mypy app`
 - Tests: `uv run pytest`
 - Migrations: `uv run alembic revision --autogenerate -m "..."` · `uv run alembic upgrade head`

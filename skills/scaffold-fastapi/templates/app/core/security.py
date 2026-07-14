@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
+import sentry_sdk
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -43,4 +44,6 @@ def get_current_user(auth: HTTPAuthorizationCredentials = Security(auth_scheme))
 
     Usage: `user_id: int = Depends(get_current_user)` on any route that requires auth.
     """
-    return decode_access_token(auth.credentials)
+    user_id = decode_access_token(auth.credentials)
+    sentry_sdk.set_user({"id": str(user_id)})  # ties errors on this request to a user
+    return user_id

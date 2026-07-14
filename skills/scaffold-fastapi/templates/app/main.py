@@ -10,6 +10,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
 from app.core.config import settings
 from app.core.exception_handler import handle_generic_exception, handle_http_exception
@@ -42,12 +43,19 @@ sentry_sdk.init(
     dsn=settings.SENTRY_DSN,
     environment=settings.ENVIRONMENT,
     release=API_VERSION,
-    traces_sample_rate=0.1,  # not env-configurable; bump here if you need more/less sampling
+    # Sample rates are hardcoded, not env-configurable — bump here if you need
+    # more/less sampling. traces_sample_rate drives performance monitoring (also
+    # what turns on SqlalchemyIntegration's per-query spans below);
+    # profiles_sample_rate is the fraction of *traced* requests that are also
+    # profiled (line-level timing) — off by default since profiling adds overhead.
+    traces_sample_rate=0.1,
+    profiles_sample_rate=0.0,
     integrations=[
         LoggingIntegration(
             level=logging.INFO,
             event_level=logging.WARNING,
         ),
+        SqlalchemyIntegration(),  # per-query spans on traced requests
     ],
 )
 app = FastAPI(

@@ -25,12 +25,19 @@ uv run alembic revision --autogenerate -m "description"
 uv run ruff check --fix app/
 uv run ruff format app/
 
+# Type check
+uv run mypy app
+
 # Run tests
 uv run pytest
 
 # Run pre-commit hooks
 uv tool run pre-commit run --files <changed-files>
 ```
+
+No CI here — `.pre-commit-config.yaml` is the enforcement layer instead: ruff +
+gitleaks + mypy run on every commit, the full test suite runs on push
+(`--hook-type pre-push` at install time, see README.md).
 
 ## Architecture
 
