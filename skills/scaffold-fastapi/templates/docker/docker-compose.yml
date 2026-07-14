@@ -1,0 +1,27 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: __PROJECT_SLUG__-api
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health/live || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-1}
+    # Assumes an externally managed Postgres reachable via DATABASE_URL in .env.
+    # Swap the default `json-file` log driver below for your infra (CloudWatch/Loki/etc.) if needed.
+    # --no-dev: the image was built with `uv sync --no-dev` (Dockerfile), so a plain
+    # `uv run` here would notice dev-only deps (ruff, pytest) are missing and sync
+    # them in on every container start — wasted time and an unwanted network call.
+    command: >
+      sh -c "uv run --no-dev alembic upgrade head &&
+      exec uv run --no-dev uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers $${UVICORN_WORKERS}"

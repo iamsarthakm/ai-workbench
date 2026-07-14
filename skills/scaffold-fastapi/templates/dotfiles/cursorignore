@@ -1,0 +1,3 @@
+# Never let the AI read real secrets — only the checked-in example stays visible.
+.env*
+!.env.example

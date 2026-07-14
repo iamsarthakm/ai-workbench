@@ -1,0 +1,43 @@
+# Python cache and compiled files
+**/__pycache__/
+**/*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build artifacts
+**/build/
+**/dist/
+**/*.egg-info/
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Git and CI
+.git/
+.gitignore
+.github/
+
+# Docker files (not needed inside the image)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Env files — never bake secrets into the image
+.env*
+!.env.example
+
+# Tests and cache dirs
+tests/
+.pytest_cache/
+.ruff_cache/
+
+# OS cruft
+**/.DS_Store

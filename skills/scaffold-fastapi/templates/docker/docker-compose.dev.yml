@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: __PROJECT_SLUG__-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: __DB_NAME__
+    ports:
+      - "5433:5432" # host 5433, not 5432 -- avoids clashing with a Postgres you may already have running locally
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: __PROJECT_SLUG__-api-dev
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      ENVIRONMENT: local
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/__DB_NAME__
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app # live reload on code changes
+      - ./alembic:/app/alembic # so a migration generated while this is running lands on the host too
+    # --no-dev: the image was built with `uv sync --no-dev` (Dockerfile); lint/tests
+    # run on the host via `uv run ruff`/`uv run pytest`, not inside this container.
+    command: >
+      sh -c "uv run --no-dev alembic upgrade head &&
+      exec uv run --no-dev uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir app"
+
+volumes:
+  db-data:
